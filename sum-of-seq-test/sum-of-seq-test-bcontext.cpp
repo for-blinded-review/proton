@@ -82,7 +82,7 @@ uint64_t reduce(coro_t::pull_type &source)
   return sum;
 }
 
-void test1(uint64_t iters) {
+void test_boost_coro(uint64_t iters) {
   puts("testing stackful... ");
   coro_t::pull_type p([iters](auto& out) { producer(out, iters); });
   auto result = reduce(p);
@@ -117,7 +117,7 @@ uint64_t reduce(bcproducer& source) {
 
 
 __attribute__((noinline)) 
-void test3(uint64_t iters) {
+void boost_fiber(uint64_t iters) {
   puts("testing stackful boost context... ");
   bcproducer p(iters);
   auto result = reduce(p);
@@ -130,11 +130,7 @@ __attribute__((noinline))
 generator<uint64_t> producer(uint64_t count) {
   for (; count != 0; --count)
     co_yield count;
-  // while (count) {
-    // auto x = count --;
-  //   co_yield count;
-  //   count --;
-  // }
+
 }
 uint64_t reduce(generator<uint64_t> &source)
 {
@@ -144,9 +140,8 @@ uint64_t reduce(generator<uint64_t> &source)
   return sum;
 }
 
-// comment out noinline and see what happens
 __attribute__((noinline)) 
-void test2(uint64_t iters) {
+void boost_coro20(uint64_t iters) {
   puts("testing stackless... ");
   auto p = producer(iters);
   auto result = reduce(p);
@@ -165,27 +160,26 @@ int main() {
     dur elapsed1, elapsed2, elapsed3;
     {
       auto start = hpc::now();
-      test1(count);
+      test_boost_coro(count);
       auto stop = hpc::now();
       elapsed1 = duration_cast<dur>(stop - start);
       printf("elapsed %g ms\n", elapsed1.count()*1000);
     }
     {
       auto start = hpc::now();
-      test3(count);
+      boost_fiber(count);
       auto stop = hpc::now();
       elapsed3 = duration_cast<dur>(stop - start);
       printf("elapsed %g ms\n", elapsed3.count()*1000);
     }
     {
       auto start = hpc::now();
-      test2(count);
+      boost_coro20(count);
       auto stop = hpc::now();
       elapsed2 = duration_cast<dur>(stop - start);
       printf("elapsed %g\n", elapsed2.count()*1000);
     }
     printf("stackless are %g times faster\n", elapsed3.count() / elapsed2.count());
-    // printf("stackful consume %g ns per iteration\n", elapsed1.count() / count * nano);
     printf("stackful context consume %g ns per iteration\n", elapsed3.count() / count * nano);
     printf("stackless consume %g ns per iteration\n", elapsed2.count() / count * nano);
   } catch (...) {

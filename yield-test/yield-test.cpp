@@ -8,16 +8,16 @@ static constexpr uint64_t ROUND = 1;
 static constexpr uint64_t TURN = 10;
 
 template <uint64_t ROUND, typename Func> void test(Func &&func) {
-  uint64_t sleep = 0;
-  uint64_t interrupt = 0;
+  uint64_t yield = 0;
+  uint64_t loop = 0;
   uint64_t maxs = 0;
   uint64_t mins = -1;
   uint64_t maxi = 0;
   uint64_t mini = -1;
   for (int i = 0; i < ROUND; i++) {
     auto [x, y] = func();
-    sleep += x;
-    interrupt += y;
+    yield += x;
+    loop += y;
     if (x > maxs)
       maxs = x;
     if (x < mins)
@@ -28,8 +28,8 @@ template <uint64_t ROUND, typename Func> void test(Func &&func) {
       mini = y;
   }
   printf("Average yield %lf loop %lf\n",
-         (sleep - maxs - mins) * 1.0 / (ROUND - 2) / THNUM,
-         (interrupt - maxi - mini) * 1.0 / (ROUND - 2) / THNUM);
+         (yield - maxs - mins) * 1.0 / (ROUND - 2) / THNUM,
+         (loop - maxi - mini) * 1.0 / (ROUND - 2) / THNUM);
 }
 
 void *yielder(void *arg) {
@@ -45,13 +45,13 @@ int main() {
   for (int i = 0; i < THNUM; i++)
     proton::thread_create(yielder, nullptr);
   test<TURN>([&]() -> std::tuple<uint64_t, uint64_t> {
-    uint64_t total_sleep = 0;
+    uint64_t total_test = 0;
     uint64_t total_interrupt = 0;
-    auto start_sleep = std::chrono::high_resolution_clock::now();
+    auto start_yield = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ROUND; i++) {
       proton::thread_yield();
     }
-    auto start_interrupt = std::chrono::high_resolution_clock::now();
+    auto start_loop = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ROUND * THNUM; i++) {
       asm volatile(""
                    :
@@ -60,17 +60,17 @@ int main() {
                      "r9", "r10", "r11", "r12", "r13", "r14", "r15");
     }
     auto emptyloop = std::chrono::high_resolution_clock::now();
-    total_sleep += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                       (start_interrupt - start_sleep))
+    total_test += std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       (start_loop - start_yield))
                        .count();
 
     total_interrupt += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                           (emptyloop - start_interrupt))
+                           (emptyloop - start_loop))
                            .count();
 
-    printf("yield %lf loop %lf\n", total_sleep * 1.0 / ROUND,
+    printf("yield %lf loop %lf\n", total_test * 1.0 / ROUND,
            total_interrupt * 1.0 / ROUND);
-    return {(total_sleep - total_interrupt) / ROUND, total_interrupt / ROUND};
+    return {(total_test - total_interrupt) / ROUND, total_interrupt / ROUND};
   });
   return 0;
 }

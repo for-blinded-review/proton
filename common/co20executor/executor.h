@@ -3,7 +3,7 @@
 #include <coroutine>
 #include <deque>
 #include "common/list.h"
-// concept真方便
+
 template <typename T>
 concept CoroTask = requires {
     T().handle.resume();
@@ -15,8 +15,6 @@ struct corofiber : public intrusive_list_node<corofiber>{
     std::coroutine_handle<> t;
 };
 
-// 实际上只能排队一个task的最简化executor
-// 可以加个队列做
 struct Executor {
     intrusive_list<corofiber> q;
     uint64_t count;

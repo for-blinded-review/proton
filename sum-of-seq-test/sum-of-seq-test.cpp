@@ -4,40 +4,6 @@
 #include <sys/time.h>
 #include "g.h"
 
-//// --- stackful coroutines
-/*
-typedef boost::coroutines2::coroutine<int> coro_t;
-
-void producer(coro_t::push_type &sink, int count) {
-  for (; count != 0; --count)
-    sink(count);
-}
-
-int reduce(coro_t::pull_type &source)
-{
-  int sum = 0;
-  for (auto v: source)
-    sum += v;
-  return sum;
-}
-
-void test1(int iters) {
-  puts("testing stackful... ");
-  coro_t::pull_type p([iters](auto& out) { producer(out, iters); });
-  auto result = reduce(p);
-  printf("=> %d\n", result);
-}
-*/
-//// --- stackless coroutines
-
-// comment out noinline and see what happens
-// __attribute__((noinline))
-// generator<int> producer(int count) {
-//   for (; count != 0; --count) {
-//     co_yield count;
-//     co_yield count / 2;
-//   }
-// }
 
 generator<uint64_t> producer(uint64_t count);
 
@@ -59,7 +25,7 @@ uint64_t reduce(generator<uint64_t> &source)
 
 // comment out noinline and see what happens
 __attribute__((noinline))
-uint64_t test2(uint64_t iters) {
+uint64_t test2level(uint64_t iters) {
   // puts("testing stackless... ");
   auto p = producer0(iters);
   auto result = reduce(p);
@@ -73,19 +39,16 @@ using dur = duration<double>;
 using hpc = high_resolution_clock;
 
 __attribute__((preserve_none))
-uint64_t testx(uint64_t c);
+uint64_t test_sequence_gen(uint64_t c);
 
 __attribute__((preserve_none))
-uint64_t testy(uint64_t c);
+uint64_t test_hanoi(uint64_t c);
 
 inline struct timeval now()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return tv;
-    // now = tv.tv_sec;
-    // now *= 1000 * 1000;
-    // return now += tv.tv_usec;
 }
 
 inline double sub(struct timeval a, struct timeval b) {
@@ -106,20 +69,20 @@ int main(int argc, char** argv) {
     auto t0 = now();
     if (argc == 2) {
       if (argv[1][0] == 'x') {
-        R = testx(count);
+        R = test_sequence_gen(count);
         name = "ful";
       } else if (argv[1][0] == 'y') {
-        R = testy(20);
+        R = test_hanoi(20);
         name = "ful nested generator (Hanoi)";
       } else goto t2;
     } else {
     t2:
-      R = test2(count);
+      R = test2level(count);
       name = "less";
     }
     auto t1 = now();
     printf("stack%s consume %g ns per iteration\n"
-           "Result=%llu\n", name, sub(t1, t0), R);
+           "Result=%lu\n", name, sub(t1, t0), R);
   } catch (...) {
     puts("caught something");
   }

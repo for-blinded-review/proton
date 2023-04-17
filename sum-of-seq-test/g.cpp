@@ -2,8 +2,6 @@
 
 __attribute__((noinline))
 generator<int> producer(int count) {
-  // uint64_t padding[100] = {0};
-  // *(volatile uint64_t*)&padding[count%100] = count;
   while((count)) {
     co_yield (count--);
   }

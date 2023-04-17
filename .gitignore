@@ -2,3 +2,10 @@
 /.cache
 /build
 /ENV.CMake
+
+# C#
+**/bin
+**/obj
+
+# Rust
+**/target
