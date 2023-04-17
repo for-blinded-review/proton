@@ -40,5 +40,6 @@ add_subdirectory(common/co20executor)
 add_subdirectory(wandbox-sample)
 add_subdirectory(hanoi-test)
 add_subdirectory(writefully-test)
+add_subdirectory(yield-test)
 
 
