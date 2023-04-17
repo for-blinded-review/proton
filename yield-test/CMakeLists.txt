@@ -1,4 +1,4 @@
-add_library(
+add_executable(
     yield-test
     yield-test.cpp
 )

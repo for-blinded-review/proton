@@ -96,26 +96,18 @@ static_assert(ROUND >= 3, "Atleast needs 3 turns");
 
 template <typename Func> void timeit(Func &&func, int round) {
   long long sp = 0;
-  long long min = INT64_MAX;
-  long long max = 0;
   for (auto t = 0; t < round; t++) {
     auto spent = func();
     sp += spent;
-    max = std::max(max, spent);
-    min = std::min(min, spent);
   }
-  printf("Average %lld us\n", (sp - max) / (round - 1));
+  printf("Average %lld us\n", sp / round);
 }
 
 int main() {
   proton::init();
   DEFER(proton::fini());
 
-  // mallopt(M_TRIM_THRESHOLD, -1);
   auto __entry_time = std::chrono::high_resolution_clock::now();
-  // posix_madvise(((char *)&__entry_time) - 6UL * 1024 * 1024, 6UL * 1024 *
-  // 1024,
-  //               MADV_WILLNEED);
   for (auto x : towerOfHanoi(1, 'a', 'c', 'b')) {
     ss++;
   }
