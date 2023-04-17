@@ -8,6 +8,6 @@ It includes source code of:
 * scheduler for C++20 stackless coroutine: **/common/co20executor**
 * benchmarks: **/*-test**
 
-And our modification to Clang 15.03 is placed in another repo at: https://github.com/for-blinded-review/llvm-project
+Our modifications to Clang 15.03 are placed in another repo at: https://github.com/for-blinded-review/llvm-project
 
 We'll change the name and repo url into real ones, after passing the blided review process.
