@@ -37,7 +37,7 @@ add_subdirectory(common/protonlib)
 add_subdirectory(common/fibsched)
 add_subdirectory(common/co20executor)
 
-add_subdirectory(wandbox-sample)
+add_subdirectory(sum-of-seq-test)
 add_subdirectory(hanoi-test)
 add_subdirectory(writefully-test)
 add_subdirectory(yield-test)
