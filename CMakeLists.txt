@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 add_link_options("-stdlib=libc++")
 set(CMAKE_CXX_FLAGS "-stdlib=libc++")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+set(CMAKE_BUILD_TYPE Release)
 
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.81.0 REQUIRED COMPONENTS context)
